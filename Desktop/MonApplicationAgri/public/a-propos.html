@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>À Propos | AgriConnect</title>
+
+    <style>
+
+        :root { 
+
+            --primary: #27ae60; 
+
+            --dark: #2c3e50; 
+
+            --light: #f4f7f6; 
+
+            --accent: #f1c40f;
+
+        }
+
+        
+
+        body { 
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+
+            margin: 0; 
+
+            background: var(--light); 
+
+            color: var(--dark);
+
+            line-height: 1.6;
+
+        }
+
+
+
+        /* Barre de Navigation */
+
+        nav { 
+
+            background: white; 
+
+            padding: 15px 5%; 
+
+            display: flex; 
+
+            justify-content: space-between; 
+
+            align-items: center; 
+
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+
+        }
+
+        .logo { font-size: 24px; font-weight: bold; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+
+
+
+        /* Header */
+
+        .about-header {
+
+            background: linear-gradient(rgba(39, 174, 96, 0.9), rgba(44, 62, 80, 0.9)), url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+
+            background-size: cover;
+
+            background-position: center;
+
+            color: white;
+
+            padding: 80px 20px;
+
+            text-align: center;
+
+        }
+
+
+
+        .container { max-width: 900px; margin: -50px auto 50px; padding: 0 20px; }
+
+        
+
+        .main-card {
+
+            background: white;
+
+            padding: 40px;
+
+            border-radius: 15px;
+
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+
+        }
+
+
+
+        h2 { color: var(--primary); font-size: 2rem; }
+
+
+
+        /* Section Valeurs */
+
+        .values-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+            gap: 20px;
+
+            margin-top: 30px;
+
+        }
+
+
+
+        .value-item {
+
+            padding: 20px;
+
+            border-left: 4px solid var(--primary);
+
+            background: #f9f9f9;
+
+            border-radius: 0 10px 10px 0;
+
+        }
+
+
+
+        .value-item h3 { margin-top: 0; color: var(--dark); }
+
+
+
+        /* Footer Rapide */
+
+        footer {
+
+            text-align: center;
+
+            padding: 40px;
+
+            background: var(--dark);
+
+            color: white;
+
+            margin-top: 50px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <nav>
+
+        <a href="index.html" class="logo"><span>🚜</span> AgriConnect</a>
+
+        <a href="index.html" style="text-decoration:none; color:var(--primary); font-weight:bold;">← Retour au Marché</a>
+
+    </nav>
+
+
+
+    <header class="about-header">
+
+        <h1>Notre Mission</h1>
+
+        <p>Rapprocher les agriculteurs des consommateurs pour une Afrique qui mange mieux.</p>
+
+    </header>
+
+
+
+    <div class="container">
+
+        <div class="main-card">
+
+            <h2>Qu'est-ce qu'AgriConnect ?</h2>
+
+            <p>
+
+                AgriConnect est une plateforme numérique solidaire née de la volonté de moderniser le commerce agricole local. 
+
+                Nous croyons que la technologie peut résoudre le problème du gaspillage alimentaire et de la juste rémunération des planteurs.
+
+            </p>
+
+
+
+            <div class="values-grid">
+
+                <div class="value-item">
+
+                    <h3>🌱 Fraîcheur</h3>
+
+                    <p>En supprimant les intermédiaires, nous garantissons que les produits arrivent du champ à votre table en un temps record.</p>
+
+                </div>
+
+                <div class="value-item">
+
+                    <h3>🤝 Soutien Local</h3>
+
+                    <p>Chaque achat sur AgriConnect aide directement une famille d'agriculteurs à vivre dignement de son travail.</p>
+
+                </div>
+
+                <div class="value-item">
+
+                    <h3>📱 Simplicité</h3>
+
+                    <p>Une interface pensée pour être utilisée par tous, même avec une simple connexion WhatsApp.</p>
+
+                </div>
+
+            </div>
+
+
+
+            <h2 style="margin-top: 40px;">Comment ça marche ?</h2>
+
+            <p>Le processus est transparent et sécurisé :</p>
+
+            <ul style="padding-left: 20px;">
+
+                <li><strong>Sélection :</strong> Vous choisissez vos produits frais dans le catalogue.</li>
+
+                <li><strong>Panier :</strong> Le site calcule automatiquement votre total.</li>
+
+                <li><strong>WhatsApp :</strong> Vous envoyez votre commande en un clic au vendeur pour convenir de la livraison.</li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+
+
+    <footer>
+
+        <p>&copy; 2025 AgriConnect - Développé avec passion pour l'agriculture.</p>
+
+    </footer>
+
+
+
+</body>
+
+</html>

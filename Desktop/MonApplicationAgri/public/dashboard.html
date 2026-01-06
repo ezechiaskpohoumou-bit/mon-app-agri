@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Espace - AgriConnect</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f2f5; }
+        .navbar { background: #27ae60; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 900px; margin: 30px auto; padding: 20px; }
+        .header-box { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .product-card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #27ae60; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .product-info h3 { margin: 0; color: #2c3e50; }
+        .product-info p { margin: 5px 0; color: #7f8c8d; }
+        .badge-price { background: #e8f5e9; color: #2ecc71; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .actions button { background: #ff4757; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-add { background: #27ae60; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h2>🚜 AgriConnect Business</h2>
+        <a href="/" style="color: white; text-decoration: none;">Voir le Marché Public</a>
+    </div>
+
+    <div class="container">
+        <div class="header-box">
+            <h1 id="welcome-msg">Bienvenue sur votre espace</h1>
+            <p>Ici, vous gérez uniquement vos produits en vente.</p>
+            <br>
+            <a href="/ajouter-produit.html" class="btn-add">+ Ajouter un nouveau produit</a>
+        </div>
+
+        <div id="my-products-list">
+            </div>
+    </div>
+
+    <script>
+        // On affiche le nom de l'utilisateur
+        document.getElementById('welcome-msg').innerText = "Espace de " + localStorage.getItem('userName');
+
+        async function chargerMesProduits() {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/products/my-products', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            const produits = await response.json();
+            const listeDiv = document.getElementById('my-products-list');
+            listeDiv.innerHTML = '';
+
+            if (produits.length === 0) {
+                listeDiv.innerHTML = "<p>Vous n'avez pas encore de produits en vente.</p>";
+                return;
+            }
+
+            produits.forEach(p => {
+                listeDiv.innerHTML += `
+                    <div class="product-card">
+                        <div class="product-info">
+                            <h3>${p.nom}</h3>
+                            <p class="badge-price">${p.prix} FCFA</p>
+                            <p>Statut : <strong>${p.statut}</strong></p>
+                        </div>
+                        <div class="actions">
+                          <button onclick="changerPrix('${p._id}')" style="background:#f1c40f; color:black; border:none; padding:8px; margin-right:5px; cursor:pointer;">Modifier Prix</button>
+                          <button onclick="changerStatut('${p._id}', '${p.statut}')" style="background:#3498db; color:white; border:none; padding:8px; margin-right:5px; cursor:pointer;">Stock</button>
+                          <button onclick="supprimerProduit('${p._id}')" style="background:#e74c3c; color:white; border:none; padding:8px; cursor:pointer;">Supprimer</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function supprimerProduit(id) {
+            if(confirm("Voulez-vous vraiment supprimer ce produit ?")) {
+                const response = await fetch(`/api/products/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+
+                if (response.ok) {
+                    chargerMesProduits(); 
+                }
+            }
+        }
+        async function changerPrix(id) {
+            const nouveauPrix = prompt("Entrez le nouveau prix (FCFA) :");
+                if (nouveauPrix) {
+                   const response = await fetch(`/api/products/${id}`, {
+                      method: 'PUT',
+                      headers:
+                     { 
+                 'Content-Type': 'application/json',
+                 'Authorization': 'Bearer ' + localStorage.getItem('token') 
+            },
+            body: JSON.stringify({ prix: nouveauPrix })
+        });
+
+        if (response.ok) {
+            chargerMesProduits(); // Rafraîchir l'affichage
+        }
+    }
+}
+
+async function changerStatut(id, statutActuel) {
+    const nouveauStatut = statutActuel === 'disponible' ? 'épuisé' : 'disponible';
+    
+    await fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token') 
+        },
+        body: JSON.stringify({ statut: nouveauStatut })
+    });
+    
+    chargerMesProduits();
+}
+
+// MODIFIER UN PRODUIT (Prix ou Statut)
+router.put('/:id', async (req, res) => {
+    try {
+        const { prix, statut } = req.body;
+        const produitModifie = await Product.findByIdAndUpdate(
+            req.params.id, 
+            { prix, statut }, 
+            { new: true }
+        );
+        res.json(produitModifie);
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la modification" });
+    }
+});
+
+// SUPPRIMER UN PRODUIT
+router.delete('/:id', async (req, res) => {
+    try {
+        await Product.findByIdAndDelete(req.params.id);
+        res.json({ message: "Produit supprimé avec succès" });
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la suppression" });
+    }
+});
+        chargerMesProduits();
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription - AgriConnect</title>
+    <link rel="stylesheet" href="style.css"> <style>
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Créer un compte</h2>
+        <form id="registerForm">
+            <input type="text" id="nom" placeholder="Nom complet" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="tel" id="telephone" placeholder="Numéro de téléphone (ex: 0707...)" required>
+            <input type="text" id="adresse" placeholder="Ville et quartier" required>
+            <input type="password" id="motDePasse" placeholder="Mot de passe" required>
+            <select id="role">
+                <option value="agriculteur">Je suis un Agriculteur</option>
+                <option value="client">Je suis un Client (Acheteur)</option>
+            </select>
+            <button type="submit">S'inscrire</button>
+        </form>
+        <p><a href="login.html">Déjà un compte ? Se connecter</a></p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nom: document.getElementById('nom').value,
+                email: document.getElementById('email').value,
+                telephone: document.getElementById('telephone').value, // On ajoute le tel !
+                adresse: document.getElementById('adresse').value,
+                motDePasse: document.getElementById('motDePasse').value,
+                role: document.getElementById('role').value
+            };
+
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert("Compte créé ! Connectez-vous maintenant.");
+                window.location.href = "login.html";
+            } else {
+                // On récupère le message d'erreur envoyé par le serveur
+                const errorData = await response.json();
+                alert("Erreur : " + errorData.erreur); // <--- Affiche la vraie cause
+                console.log("Détail technique :", errorData);
+            }
+        });
+    </script>
+</body>
+</html>
