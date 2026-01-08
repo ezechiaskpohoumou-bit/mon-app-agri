@@ -4,86 +4,120 @@
     <meta charset="UTF-8">
     <title>Ajouter un Produit - AgriConnect</title>
     <style>
-        body { font-family: sans-serif; padding: 50px; background: #e9ecef; }
-        .form-container { background: white; padding: 30px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        input, textarea, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; background: #28a745; color: white; border: none; padding: 12px; cursor: pointer; font-size: 16px; border-radius: 4px; }
-        button:hover { background: #218838; }
-        a { display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f2f5; }
+        .navbar { background: #27ae60; padding: 15px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .navbar a { color: white; text-decoration: none; font-weight: bold; }
+        
+        .form-container { background: white; padding: 30px; border-radius: 12px; max-width: 450px; margin: 40px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
+        
+        label { display: block; margin-top: 10px; font-size: 14px; color: #666; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        
+        button { width: 100%; background: #27ae60; color: white; border: none; padding: 15px; cursor: pointer; font-size: 17px; border-radius: 6px; font-weight: bold; margin-top: 20px; transition: 0.3s; }
+        button:hover { background: #219150; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #27ae60; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
-<nav style="background: #27ae60; padding: 15px; display: flex; justify-content: space-around; align-items: center;">
-    <a href="/" style="color: white; text-decoration: none; font-weight: bold; font-size: 20px;">🚜 AgriConnect</a>
+
+<nav class="navbar">
+    <a href="/" style="font-size: 22px;">🚜 AgriConnect</a>
     <div>
-        <a href="/" style="color: white; text-decoration: none; margin: 0 15px;">Marché</a>
-        <a href="/ajouter-produit.html" style="color: white; text-decoration: none; margin: 0 15px;">Vendre</a>
-        <a href="/login.html" id="nav-login" style="color: white; text-decoration: none; margin: 0 15px;">Connexion</a>
-        <span id="user-name" style="color: #f1c40f; font-weight: bold; margin-left: 15px;"></span>
+        <a href="/">Marché</a>
+        <a href="/dashboard.html" style="margin-left: 20px;">Mon Espace</a>
     </div>
 </nav>
+
 <div class="form-container">
     <h2>🍎 Nouveau Produit</h2>
     <form id="productForm">
-        <input type="text" id="nom" placeholder="Nom du produit (ex: Igname)" required>
-        <textarea id="description" placeholder="Description..."></textarea>
-        <input type="number" id="prix" placeholder="Prix (FCFA)" required>
-        <input type="text" id="unite" placeholder="Unité (ex: kg, sac, lot)" required>
-        <input type="number" id="quantite" placeholder="Quantité en stock" required>
-        <input type="text" id="agriculteurId">
-        
-        <button type="submit">Mettre en vente</button>
+        <label for="nom">Nom de l'article</label>
+        <input type="text" id="nom" placeholder="Ex: Igname, Tomates, Riz..." required>
+
+        <label for="categorie">Catégorie de rangement</label>
+        <select id="categorie" required>
+            <option value="">-- Choisir une catégorie --</option>
+            <option value="Légumes">Légumes</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Tubercules">Tubercules</option>
+            <option value="Céréales">Céréales</option>
+            <option value="Autre">Divers</option>
+        </select>
+
+        <label for="description">Description (facultatif)</label>
+        <textarea id="description" rows="3" placeholder="Qualité, origine, conseils..."></textarea>
+
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 2;">
+                <label for="prix">Prix (FCFA)</label>
+                <input type="number" id="prix" placeholder="Ex: 1000" required>
+            </div>
+            <div style="flex: 1;">
+                <label for="unite">Par unité</label>
+                <input type="text" id="unite" placeholder="kg, sac..." required>
+            </div>
+        </div>
+
+        <label for="quantite">Quantité totale en stock</label>
+        <input type="number" id="quantite" placeholder="Ex: 50" required>
+
+        <label for="image">Lien photo (URL)</label>
+        <input type="text" id="image" placeholder="https://..." value="https://images.unsplash.com/photo-1542838132-92c53300491e?w=500">
+
+        <button type="submit">🚀 Mettre en vente sur le marché</button>
     </form>
-    <a href="/">⬅ Retour au marché</a>
+    <a href="/dashboard.html" class="back-link">⬅ Annuler et retourner à mon espace</a>
 </div>
 
 <script>
-  // 1. Récupération des infos de connexion
-const savedId = localStorage.getItem('userId');
+// 1. Vérification de la session
 const token = localStorage.getItem('token');
+const userId = localStorage.getItem('userId');
 
-if (!savedId || !token) {
-    alert("Merci de vous connecter d'abord !");
+if (!token || !userId) {
+    alert("Session expirée. Veuillez vous reconnecter.");
     window.location.href = "login.html";
-} else {
-    // On remplit le champ caché
-    document.getElementById('agriculteurId').value = savedId;
 }
 
-// 2. Envoi du formulaire
+// 2. Gestion unique de l'envoi
 document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const donnees = {
         nom: document.getElementById('nom').value,
+        categorie: document.getElementById('categorie').value,
         description: document.getElementById('description').value,
         prix: document.getElementById('prix').value,
         unite: document.getElementById('unite').value,
         quantite: document.getElementById('quantite').value,
-        // On met une image par défaut si le champ n'existe pas encore
-        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500", 
-        agriculteurId: document.getElementById('agriculteurId').value
+        image: document.getElementById('image').value,
+        agriculteurId: userId
     };
 
-    const response = await fetch('/api/products/add', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify(donnees)
-    });
+    try {
+        const response = await fetch('/api/products/add', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(donnees)
+        });
 
-    const resultat = await response.json();
-    
-    if (response.ok) {
-        alert("Bravo ! Produit ajouté au marché.");
-        window.location.href = "index.html"; 
-    } else {
-        alert("Erreur : " + (resultat.erreur || resultat.message));
+        const resJSON = await response.json();
+
+        if (response.ok) {
+            alert("Succès ! Votre produit est maintenant visible sur le marché.");
+            window.location.href = "dashboard.html"; 
+        } else {
+            alert("Erreur : " + (resJSON.message || "Impossible d'ajouter le produit"));
+        }
+    } catch (error) {
+        console.error("Erreur Fetch :", error);
+        alert("Problème de connexion au serveur.");
     }
 });
-   
 </script>
 
 </body>

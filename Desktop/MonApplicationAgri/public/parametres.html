@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Paramètres - AgriConnect</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .settings-card { background: white; max-width: 500px; margin: 40px auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        label { font-weight: bold; color: #2c3e50; font-size: 14px; }
+        .btn-save { background: #27ae60; color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #666; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="settings-card">
+    <h2>⚙️ Mes Paramètres</h2>
+    <form id="settingsForm">
+        <label>Nom complet ou Nom de la ferme</label>
+        <input type="text" id="edit-nom" required>
+
+        <label>Numéro WhatsApp (Format: 22507000000)</label>
+        <input type="text" id="edit-tel" placeholder="Ex: 225...">
+
+        <label>URL de ma photo de profil</label>
+        <input type="text" id="edit-photo" oninput="document.getElementById('p-preview').src = this.value">
+        <img id="p-preview" src="" style="width: 100px; height: 100px; border-radius: 50%; display: block; margin: 10px auto; object-fit: cover; border: 2px solid #27ae60;">
+
+        <button type="submit" class="btn-save">Enregistrer les modifications</button>
+    </form>
+    <a href="dashboard.html" class="back-link">⇠ Retour au Dashboard</a>
+</div>
+
+<script>
+    // 1. Charger les données actuelles
+    async function chargerDonnees() {
+        const res = await fetch('/api/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+        });
+        const user = await res.json();
+        
+        document.getElementById('edit-nom').value = user.nom;
+        document.getElementById('edit-tel').value = user.telephone || '';
+        document.getElementById('edit-photo').value = user.photo || '';
+        document.getElementById('p-preview').src = user.photo || 'https://via.placeholder.com/100';
+    }
+
+    // 2. Sauvegarder les modifications
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const data = {
+            nom: document.getElementById('edit-nom').value,
+            telephone: document.getElementById('edit-tel').value,
+            photo: document.getElementById('edit-photo').value
+        };
+
+        const response = await fetch('/api/auth/update', {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert("Profil mis à jour avec succès !");
+            window.location.href = "dashboard.html";
+        } else {
+            alert("Erreur lors de la mise à jour.");
+        }
+    });
+
+    chargerDonnees();
+</script>
+
+</body>
+</html>

@@ -4,31 +4,56 @@
     <meta charset="UTF-8">
     <title>Mon Espace - AgriConnect</title>
     <style>
+        :root { --primary: #27ae60; --danger: #e74c3c; --warning: #f1c40f; --info: #3498db; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f2f5; }
-        .navbar { background: #27ae60; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .container { max-width: 900px; margin: 30px auto; padding: 20px; }
-        .header-box { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .product-card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #27ae60; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .product-info h3 { margin: 0; color: #2c3e50; }
-        .product-info p { margin: 5px 0; color: #7f8c8d; }
-        .badge-price { background: #e8f5e9; color: #2ecc71; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
-        .actions button { background: #ff4757; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
-        .btn-add { background: #27ae60; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; }
+        
+        /* Navbar */
+        .navbar { background: var(--primary); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        /* Profil Section */
+        #user-profile { background: white; padding: 20px; border-bottom: 1px solid #ddd; text-align: center; }
+        #user-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
+        
+        /* Contenu */
+        .container { max-width: 1000px; margin: 30px auto; padding: 20px; }
+        .header-box { background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        /* Cartes Produits */
+        .product-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .product-info h3 { margin: 0; color: #2c3e50; font-size: 1.2rem; }
+        .badge-price { background: #e8f5e9; color: var(--primary); padding: 5px 12px; border-radius: 20px; font-weight: bold; display: inline-block; margin: 10px 0; }
+        .status-tag { font-size: 0.85rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+        .status-disponible { background: #d4edda; color: #155724; }
+        .status-epuise { background: #f8d7da; color: #721c24; }
+        
+        /* Boutons */
+        .btn-action { border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-left: 5px; transition: 0.2s; color: white; }
+        .btn-add { background: var(--primary); color: white; text-decoration: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; display: inline-block; }
+        .logout-btn { background: transparent; border: 1px solid white; color: white; padding: 5px 10px; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="navbar">
+    <nav class="navbar">
         <h2>🚜 AgriConnect Business</h2>
-        <a href="/" style="color: white; text-decoration: none;">Voir le Marché Public</a>
+        <div>
+            <a href="index.html" style="color: white; text-decoration: none; margin-right: 15px;">Voir le Marché</a>
+            <button onclick="deconnexion()" class="logout-btn">Déconnexion</button>
+        </div>
+    </nav>
+
+    <div id="user-profile" style="display: none;">
+        <img id="user-photo" src="" alt="Profil">
+        <h3 id="user-name">Chargement...</h3>
+        <p id="user-email" style="color: #666; font-size: 0.9rem;"></p>
     </div>
 
     <div class="container">
         <div class="header-box">
-            <h1 id="welcome-msg">Bienvenue sur votre espace</h1>
-            <p>Ici, vous gérez uniquement vos produits en vente.</p>
+            <h1 id="welcome-msg">Bienvenue</h1>
+            <p>Gérez vos stocks et vos prix en temps réel.</p>
             <br>
-            <a href="/ajouter-produit.html" class="btn-add">+ Ajouter un nouveau produit</a>
+            <a href="ajouter-produit.html" class="btn-add">+ Ajouter un nouveau produit</a>
         </div>
 
         <div id="my-products-list">
@@ -36,9 +61,32 @@
     </div>
 
     <script>
-        // On affiche le nom de l'utilisateur
-        document.getElementById('welcome-msg').innerText = "Espace de " + localStorage.getItem('userName');
+        // --- GESTION DU PROFIL ---
+        async function chargerProfil() {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = "login.html"; return; }
 
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('user-profile').style.display = 'block';
+                    document.getElementById('user-name').innerText = user.nom;
+                    document.getElementById('user-email').innerText = user.email;
+                    document.getElementById('user-photo').src = user.photo || 'https://via.placeholder.com/80';
+                    document.getElementById('welcome-msg').innerText = `Espace de ${user.nom}`;
+                } else {
+                    deconnexion();
+                }
+            } catch (error) {
+                console.error("Erreur profil:", error);
+            }
+        }
+
+        // --- GESTION DES PRODUITS ---
         async function chargerMesProduits() {
             const token = localStorage.getItem('token');
             const response = await fetch('/api/products/my-products', {
@@ -49,100 +97,72 @@
             const listeDiv = document.getElementById('my-products-list');
             listeDiv.innerHTML = '';
 
-            if (produits.length === 0) {
-                listeDiv.innerHTML = "<p>Vous n'avez pas encore de produits en vente.</p>";
+            if (!produits || produits.length === 0) {
+                listeDiv.innerHTML = `<p style="text-align:center; color:#999;">Aucun produit en vente.</p>`;
                 return;
             }
 
             produits.forEach(p => {
+                const isDispo = p.statut === 'disponible';
                 listeDiv.innerHTML += `
                     <div class="product-card">
                         <div class="product-info">
                             <h3>${p.nom}</h3>
-                            <p class="badge-price">${p.prix} FCFA</p>
-                            <p>Statut : <strong>${p.statut}</strong></p>
+                            <div class="badge-price">${p.prix} FCFA</div><br>
+                            <span class="status-tag ${isDispo ? 'status-disponible' : 'status-epuise'}">${p.statut}</span>
                         </div>
                         <div class="actions">
-                          <button onclick="changerPrix('${p._id}')" style="background:#f1c40f; color:black; border:none; padding:8px; margin-right:5px; cursor:pointer;">Modifier Prix</button>
-                          <button onclick="changerStatut('${p._id}', '${p.statut}')" style="background:#3498db; color:white; border:none; padding:8px; margin-right:5px; cursor:pointer;">Stock</button>
-                          <button onclick="supprimerProduit('${p._id}')" style="background:#e74c3c; color:white; border:none; padding:8px; cursor:pointer;">Supprimer</button>
+                            <button onclick="changerPrix('${p._id}')" class="btn-action" style="background:var(--warning); color:black;">💰 Prix</button>
+                            <button onclick="changerStatut('${p._id}', '${p.statut}')" class="btn-action" style="background:var(--info)">📦 Stock</button>
+                            <button onclick="supprimerProduit('${p._id}')" class="btn-action" style="background:var(--danger)">🗑️</button>
                         </div>
                     </div>
                 `;
             });
         }
 
+        async function appelerAPI(id, donnees) {
+            await fetch(`/api/products/${id}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token') 
+                },
+                body: JSON.stringify(donnees)
+            });
+            chargerMesProduits();
+        }
+
+        async function changerPrix(id) {
+            const prix = prompt("Nouveau prix (FCFA) :");
+            if (prix) await appelerAPI(id, { prix: parseInt(prix) });
+        }
+
+        async function changerStatut(id, actuel) {
+            const nouveau = actuel === 'disponible' ? 'épuisé' : 'disponible';
+            await appelerAPI(id, { statut: nouveau });
+        }
+
         async function supprimerProduit(id) {
-            if(confirm("Voulez-vous vraiment supprimer ce produit ?")) {
-                const response = await fetch(`/api/products/${id}`, {
+            if(confirm("Supprimer ce produit ?")) {
+                await fetch(`/api/products/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
                 });
-
-                if (response.ok) {
-                    chargerMesProduits(); 
-                }
+                chargerMesProduits();
             }
         }
-        async function changerPrix(id) {
-            const nouveauPrix = prompt("Entrez le nouveau prix (FCFA) :");
-                if (nouveauPrix) {
-                   const response = await fetch(`/api/products/${id}`, {
-                      method: 'PUT',
-                      headers:
-                     { 
-                 'Content-Type': 'application/json',
-                 'Authorization': 'Bearer ' + localStorage.getItem('token') 
-            },
-            body: JSON.stringify({ prix: nouveauPrix })
-        });
 
-        if (response.ok) {
-            chargerMesProduits(); // Rafraîchir l'affichage
+        function deconnexion() {
+            localStorage.clear();
+            window.location.href = "login.html";
         }
-    }
-}
 
-async function changerStatut(id, statutActuel) {
-    const nouveauStatut = statutActuel === 'disponible' ? 'épuisé' : 'disponible';
-    
-    await fetch(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token') 
-        },
-        body: JSON.stringify({ statut: nouveauStatut })
-    });
-    
-    chargerMesProduits();
-}
-
-// MODIFIER UN PRODUIT (Prix ou Statut)
-router.put('/:id', async (req, res) => {
-    try {
-        const { prix, statut } = req.body;
-        const produitModifie = await Product.findByIdAndUpdate(
-            req.params.id, 
-            { prix, statut }, 
-            { new: true }
-        );
-        res.json(produitModifie);
-    } catch (error) {
-        res.status(500).json({ message: "Erreur lors de la modification" });
-    }
-});
-
-// SUPPRIMER UN PRODUIT
-router.delete('/:id', async (req, res) => {
-    try {
-        await Product.findByIdAndDelete(req.params.id);
-        res.json({ message: "Produit supprimé avec succès" });
-    } catch (error) {
-        res.status(500).json({ message: "Erreur lors de la suppression" });
-    }
-});
-        chargerMesProduits();
+        // Initialisation
+        window.onload = () => {
+            chargerProfil();
+            chargerMesProduits();
+        };
     </script>
 </body>
 </html>

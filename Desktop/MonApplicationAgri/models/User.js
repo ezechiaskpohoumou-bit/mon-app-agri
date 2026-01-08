@@ -20,8 +20,9 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['menage', 'agriculteur'], // Seuls ces deux rôles sont autorisés
-        required: true
+        enum: ['admin', 'client', 'agriculteur'], // Seuls ces deux rôles sont autorisés
+        required: true,
+        default: 'client' 
     },
     adresse: {
         type: String,
