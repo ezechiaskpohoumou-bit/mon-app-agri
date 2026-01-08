@@ -4,21 +4,19 @@ const Product = require('../models/Product');
 const auth = require('../middleware/auth');
 
 // 1. AJOUTER UN PRODUIT
-// POST http://localhost:4000/api/products/add
 router.post('/add', auth, async (req, res) => {
     try {
-        // On récupère TOUTES les infos envoyées par le formulaire
         const { nom, categorie, description, prix, unite, quantite, image } = req.body;
 
         const nouveauProduit = new Product({
             nom,
-            categorie, // Crucial pour le rangement par catégorie
+            categorie,
             description,
             prix,
             unite,
             quantite,
             image: image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500",
-            agriculteur: req.auth.userId // On utilise l'ID extrait du Token par le middleware auth
+            agriculteur: req.auth.userId 
         });
 
         await nouveauProduit.save();
@@ -28,20 +26,18 @@ router.post('/add', auth, async (req, res) => {
     }
 });
 
-// 2. VOIR TOUS LES PRODUITS (Pour le Marché Public)
-// GET http://localhost:4000/api/products
+// 2. VOIR TOUS LES PRODUITS (Corrigé ici)
 router.get('/', async (req, res) => {
     try {
-        // On récupère les produits et on "joint" les infos de l'agriculteur
-        const produits = await Product.find().sort({ createdAt: -1 }).populate('agriculteur',
+        // Correction : On ferme bien la parenthèse du populate et on met un point-virgule
+        const produits = await Product.find().sort({ createdAt: -1 }).populate('agriculteur', 'nom email');
         res.status(200).json(produits);
     } catch (error) {
         res.status(500).json({ message: "Erreur lors de la récupération", erreur: error.message });
     }    
 });
 
-// 3. VOIR UNIQUEMENT MES PRODUITS (Espace Business)
-// GET http://localhost:4000/api/products/my-products
+// 3. VOIR UNIQUEMENT MES PRODUITS
 router.get('/my-products', auth, async (req, res) => {
     try {
         const mesProduits = await Product.find({ agriculteur: req.auth.userId });
@@ -51,19 +47,16 @@ router.get('/my-products', auth, async (req, res) => {
     }
 });
 
-// 4. MODIFIER UN PRODUIT (Prix, Stock, etc.)
-// PUT http://localhost:4000/api/products/:id
+// 4. MODIFIER UN PRODUIT
 router.put('/:id', auth, async (req, res) => {
     try {
         let produit = await Product.findById(req.params.id);
         if (!produit) return res.status(404).json({ erreur: "Produit non trouvé" });
 
-        // Sécurité : Seul le propriétaire peut modifier
         if (produit.agriculteur.toString() !== req.auth.userId) {
             return res.status(403).json({ erreur: "Action non autorisée" });
         }
 
-        // Si la quantité est mise à jour, on ajuste le statut
         if (req.body.quantite !== undefined) {
             req.body.statut = req.body.quantite <= 0 ? 'épuisé' : 'disponible';
         }
@@ -76,7 +69,6 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // 5. SUPPRIMER UN PRODUIT
-// DELETE http://localhost:4000/api/products/:id
 router.delete('/:id', auth, async (req, res) => {
     try {
         const produit = await Product.findById(req.params.id);
@@ -91,16 +83,6 @@ router.delete('/:id', auth, async (req, res) => {
     } catch (error) {
         res.status(500).json({ erreur: error.message });
     }
-});
-
-router.delete('/:id', auth, async (req, res) => {
-    
-    const produit = await Product.findById(req.params.id);
-    
-    if (produit.agriculteur.toString() !== req.auth.userId) {
-        return res.status(403).json({ message: "Vous n'êtes pas le propriétaire !" });
-    }
-    
 });
 
 module.exports = router;
